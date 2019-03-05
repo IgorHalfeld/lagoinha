@@ -9,11 +9,10 @@ import (
 	"github.com/reactivex/rxgo/observer"
 )
 
-const proxyURL = "https://proxier.now.sh/"
-const token = "37d718d2984e6452584a76d3d59d3a26"
-
 // FetchCepAbertoService - fetch data from cepaberto api
 func FetchCepAbertoService(cepRaw interface{}) observable.Observable {
+	const proxyURL = "https://proxier.now.sh/"
+	const token = "37d718d2984e6452584a76d3d59d3a26"
 	return observable.Create(func(emitter *observer.Observer, disposed bool) {
 		cep, _ := cepRaw.(string)
 		client := &http.Client{}

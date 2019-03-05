@@ -32,6 +32,7 @@ func main() {
 		FlatMap(utils.ValidateInputLength, 1).
 		FlatMap(utils.LeftPadWithZeros, 1).
 		// FlatMap(services.FetchViaCepService, 1).
-		FlatMap(services.FetchCepAbertoService, 1).
+		// FlatMap(services.FetchCepAbertoService, 1).
+		FlatMap(services.FetchCepCorreiosService, 1).
 		Subscribe(watcher)
 }
