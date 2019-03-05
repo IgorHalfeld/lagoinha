@@ -1,22 +1,32 @@
 package services
 
 import (
+	"encoding/json"
 	"net/http"
 
+	"github.com/igorhalfeld/lagoinha/models"
 	"github.com/reactivex/rxgo/observable"
 	"github.com/reactivex/rxgo/observer"
 )
 
-// FetchViaCepService - fetch data from via cep api
-func FetchViaCepService(cep string) observable.Observable {
+// FetchViaCepService - fetch data from viacep api
+func FetchViaCepService(cepRaw interface{}) observable.Observable {
 	return observable.Create(func(emitter *observer.Observer, disposed bool) {
-		response, err := http.Get("https://viacep.com.br/ws/" + cep + "/json/")
+		cep, _ := cepRaw.(string)
+		response, fetchError := http.Get("https://viacep.com.br/ws/" + cep + "/json/")
 
-		if err != nil {
-			emitter.OnError(err)
+		if fetchError != nil {
+			emitter.OnError(fetchError)
 		}
 
-		emitter.OnNext(response)
+		cepResponse := models.ViaCepResponse{}
+		parseHasErrors := json.NewDecoder(response.Body).Decode(&cepResponse)
+		if parseHasErrors != nil {
+			emitter.OnError(parseHasErrors)
+		}
+		emitter.OnNext(cepResponse)
+
+		defer response.Body.Close()
 		emitter.OnDone()
 	})
 }

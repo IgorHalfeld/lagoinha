@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/igorhalfeld/lagoinha/services"
 	"github.com/igorhalfeld/lagoinha/utils"
 	"github.com/reactivex/rxgo/observable"
 	"github.com/reactivex/rxgo/observer"
@@ -30,5 +31,7 @@ func main() {
 		FlatMap(utils.RemoveSpecialCharacters, 1).
 		FlatMap(utils.ValidateInputLength, 1).
 		FlatMap(utils.LeftPadWithZeros, 1).
+		// FlatMap(services.FetchViaCepService, 1).
+		FlatMap(services.FetchCepAbertoService, 1).
 		Subscribe(watcher)
 }
