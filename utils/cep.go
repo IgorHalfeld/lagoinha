@@ -4,7 +4,6 @@ import (
 	"errors"
 	"regexp"
 	"strings"
-	"unicode/utf8"
 
 	"github.com/reactivex/rxgo/observable"
 	"github.com/reactivex/rxgo/observer"
@@ -13,13 +12,14 @@ import (
 const cepSize = 8
 
 // ValidateInputType - Validate input cep
-func ValidateInputType(cepRaw interface{}) interface{} {
+func ValidateInputType(cepRaw interface{}) observable.Observable {
 	return observable.Create(func(emitter *observer.Observer, disposed bool) {
 
 		_, isString := cepRaw.(string)
 
 		if isString {
 			emitter.OnNext(cepRaw)
+			emitter.OnDone()
 		} else {
 			emitter.OnError(errors.New("Cep must be string"))
 		}
@@ -27,12 +27,13 @@ func ValidateInputType(cepRaw interface{}) interface{} {
 }
 
 // ValidateInputLength - Validate input length
-func ValidateInputLength(cepRaw interface{}) interface{} {
+func ValidateInputLength(cepRaw interface{}) observable.Observable {
 	return observable.Create(func(emitter *observer.Observer, disposed bool) {
 		cep, _ := cepRaw.(string)
-		cepLength := utf8.RuneCountInString(cep)
+		cepLength := len(cep)
 		if cepLength <= cepSize {
 			emitter.OnNext(cep)
+			emitter.OnDone()
 		} else {
 			emitter.OnError(errors.New("Cep length is less than 8 characters"))
 		}
@@ -40,20 +41,24 @@ func ValidateInputLength(cepRaw interface{}) interface{} {
 }
 
 // RemoveSpecialCharacters - Remove special characters
-func RemoveSpecialCharacters(cepRaw string) observable.Observable {
+func RemoveSpecialCharacters(cepRaw interface{}) observable.Observable {
 	return observable.Create(func(emitter *observer.Observer, disposed bool) {
-		rule := regexp.MustCompile(`/\D+/g`)
-		cleanCep := rule.ReplaceAllString(cepRaw, "")
+		cep, _ := cepRaw.(string)
+		rule := regexp.MustCompile(`\D+`)
+		cleanCep := rule.ReplaceAllString(cep, "")
 		emitter.OnNext(cleanCep)
+		emitter.OnDone()
 	})
 }
 
 // LeftPadWithZeros - Pad cep with zeros
-func LeftPadWithZeros(cepRaw string) observable.Observable {
+func LeftPadWithZeros(cepRaw interface{}) observable.Observable {
 	return observable.Create(func(emitter *observer.Observer, disposed bool) {
-		cepLength := utf8.RuneCountInString(cepRaw)
+		cep, _ := cepRaw.(string)
+		cepLength := len(cep)
 		timesToRepeat := cepSize - cepLength
 		pad := strings.Repeat("0", timesToRepeat)
-		emitter.OnNext(pad + cepRaw)
+		emitter.OnNext(pad + cep)
+		emitter.OnDone()
 	})
 }

@@ -26,10 +26,9 @@ func main() {
 
 	<-observable.
 		Just(cep).
-		Map(utils.ValidateInputType).
-		// FlatMap(utils.ValidateInputLength, 1).
-		// Map(func(c interface{}) interface{} {
-		// 	return utils.ValidateInputType(c)
-		// }).
+		FlatMap(utils.ValidateInputType, 1).
+		FlatMap(utils.RemoveSpecialCharacters, 1).
+		FlatMap(utils.ValidateInputLength, 1).
+		FlatMap(utils.LeftPadWithZeros, 1).
 		Subscribe(watcher)
 }
