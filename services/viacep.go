@@ -5,28 +5,27 @@ import (
 	"net/http"
 
 	"github.com/igorhalfeld/lagoinha/models"
-	"github.com/reactivex/rxgo/observable"
-	"github.com/reactivex/rxgo/observer"
 )
 
 // FetchViaCepService - fetch data from viacep api
-func FetchViaCepService(cepRaw interface{}) observable.Observable {
-	return observable.Create(func(emitter *observer.Observer, disposed bool) {
-		cep, _ := cepRaw.(string)
-		response, fetchError := http.Get("https://viacep.com.br/ws/" + cep + "/json/")
+func FetchViaCepService(cep string, channel chan models.Status) {
+	response, fetchError := http.Get("https://viacep.com.br/ws/" + cep + "/json/")
+	cepResponse := models.ViaCepResponse{}
+	errorStatus := models.Status{Ok: false}
 
-		if fetchError != nil {
-			emitter.OnError(fetchError)
-		}
+	if fetchError != nil {
+		errorStatus.Value = fetchError
+		channel <- errorStatus
+	}
 
-		cepResponse := models.ViaCepResponse{}
-		parseHasErrors := json.NewDecoder(response.Body).Decode(&cepResponse)
-		if parseHasErrors != nil {
-			emitter.OnError(parseHasErrors)
-		}
-		emitter.OnNext(cepResponse)
-
-		defer response.Body.Close()
-		emitter.OnDone()
-	})
+	parseHasErrors := json.NewDecoder(response.Body).Decode(&cepResponse)
+	if parseHasErrors != nil {
+		errorStatus.Value = parseHasErrors
+		channel <- errorStatus
+	}
+	channel <- models.Status{
+		Ok:    true,
+		Value: cepResponse,
+	}
+	defer response.Body.Close()
 }

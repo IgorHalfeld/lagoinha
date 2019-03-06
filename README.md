@@ -12,4 +12,14 @@
 
 --- 
 
-> Work in progress
+### Install
+
+```sh
+go get -u https://github.com/IgorHalfeld/lagoinha.git
+```
+
+### How to use
+
+```golang
+
+```

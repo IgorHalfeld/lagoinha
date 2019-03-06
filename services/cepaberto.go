@@ -5,38 +5,40 @@ import (
 	"net/http"
 
 	"github.com/igorhalfeld/lagoinha/models"
-	"github.com/reactivex/rxgo/observable"
-	"github.com/reactivex/rxgo/observer"
 )
 
 // FetchCepAbertoService - fetch data from cepaberto api
-func FetchCepAbertoService(cepRaw interface{}) observable.Observable {
+func FetchCepAbertoService(cep string, channel chan models.Status) {
 	const proxyURL = "https://proxier.now.sh/"
 	const token = "37d718d2984e6452584a76d3d59d3a26"
-	return observable.Create(func(emitter *observer.Observer, disposed bool) {
-		cep, _ := cepRaw.(string)
-		client := &http.Client{}
+	client := &http.Client{}
+	cepResponse := models.CepAbertoResponse{}
+	errorStatus := models.Status{Ok: false}
 
-		url := proxyURL + "http://www.cepaberto.com/api/v2/ceps.json?cep=" + cep
-		request, createRequestError := http.NewRequest("GET", url, nil)
-		if createRequestError != nil {
-			emitter.OnError(createRequestError)
-		}
-		request.Header.Set("content-type", "application/json;charset=utf-8")
-		request.Header.Set("Authorization", "Token token="+token)
+	url := proxyURL + "http://www.cepaberto.com/api/v2/ceps.json?cep=" + cep
+	request, createRequestError := http.NewRequest("GET", url, nil)
+	if createRequestError != nil {
+		errorStatus.Value = createRequestError
+		channel <- errorStatus
+	}
+	request.Header.Set("content-type", "application/json;charset=utf-8")
+	request.Header.Set("Authorization", "Token token="+token)
 
-		response, fetchError := client.Do(request)
-		if fetchError != nil {
-			emitter.OnError(fetchError)
-		}
-		cepResponse := models.CepAbertoResponse{}
-		parseHasErrors := json.NewDecoder(response.Body).Decode(&cepResponse)
-		if parseHasErrors != nil {
-			emitter.OnError(parseHasErrors)
-		}
-		emitter.OnNext(cepResponse)
-		emitter.OnDone()
+	response, fetchError := client.Do(request)
+	if fetchError != nil {
+		errorStatus.Value = fetchError
+		channel <- errorStatus
+	}
 
-		defer response.Body.Close()
-	})
+	parseHasErrors := json.NewDecoder(response.Body).Decode(&cepResponse)
+	if parseHasErrors != nil {
+		errorStatus.Value = parseHasErrors
+		channel <- errorStatus
+	}
+	channel <- models.Status{
+		Ok:    true,
+		Value: cepResponse,
+	}
+
+	defer response.Body.Close()
 }

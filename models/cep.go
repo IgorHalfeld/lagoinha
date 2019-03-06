@@ -1,5 +1,11 @@
 package models
 
+// Status - service status response
+type Status struct {
+	Ok    bool
+	Value interface{}
+}
+
 // ViaCepResponse - Via cep response
 type ViaCepResponse struct {
 	Cep          string `json:"cep"`

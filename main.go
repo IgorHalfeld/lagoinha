@@ -3,16 +3,13 @@ package main
 import (
 	"fmt"
 
-	"github.com/igorhalfeld/lagoinha/services"
 	"github.com/igorhalfeld/lagoinha/utils"
 	"github.com/reactivex/rxgo/observable"
 	"github.com/reactivex/rxgo/observer"
 )
 
-func main() {
-
-	cep := "01307-000"
-
+// Cep - get address
+func Cep(cep string) {
 	watcher := observer.Observer{
 		NextHandler: func(item interface{}) {
 			fmt.Printf("Processing: %v\n", item)
@@ -31,8 +28,6 @@ func main() {
 		FlatMap(utils.RemoveSpecialCharacters, 1).
 		FlatMap(utils.ValidateInputLength, 1).
 		FlatMap(utils.LeftPadWithZeros, 1).
-		// FlatMap(services.FetchViaCepService, 1).
-		// FlatMap(services.FetchCepAbertoService, 1).
-		FlatMap(services.FetchCepCorreiosService, 1).
+		FlatMap(utils.RaceServices, 1).
 		Subscribe(watcher)
 }
