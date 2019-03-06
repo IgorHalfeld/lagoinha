@@ -6,6 +6,15 @@ type Status struct {
 	Value interface{}
 }
 
+// CepResponse - logoinha package response
+type CepResponse struct {
+	Cep          string
+	State        string
+	City         string
+	Neighborhood string
+	Street       string
+}
+
 // ViaCepResponse - Via cep response
 type ViaCepResponse struct {
 	Cep          string `json:"cep"`
