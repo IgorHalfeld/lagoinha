@@ -46,10 +46,14 @@ func FetchCepCorreiosService(cep string, channel chan models.Status) {
 		errorStatus.Value = parseHasErrors
 		channel <- errorStatus
 	}
-	channel <- models.Status{
-		Ok:    true,
-		Value: cepResponse.Body.Consult.Return,
+
+	res := models.Status{Ok: true}
+	if cepResponse.Body.Consult.Return.Cep == "" {
+		res.Value = nil
+	} else {
+		res.Value = cepResponse.Body.Consult.Return
 	}
+	channel <- res
 
 	defer response.Body.Close()
 }

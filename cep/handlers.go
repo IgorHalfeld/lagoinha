@@ -1,8 +1,9 @@
 package cep
 
 import (
-	"fmt"
+	"errors"
 
+	"github.com/igorhalfeld/lagoinha/models"
 	"github.com/igorhalfeld/lagoinha/utils"
 	"github.com/reactivex/rxgo/observable"
 	"github.com/reactivex/rxgo/observer"
@@ -21,7 +22,13 @@ func Cep(cep string) (interface{}, interface{}) {
 			err = erro
 		},
 		DoneHandler: func() {
-			fmt.Println("Done!")
+			// Fix errHandler above
+			if address == nil {
+				err = models.Status{
+					Ok:    false,
+					Value: errors.New("Some happen wrong"),
+				}
+			}
 		},
 	}
 

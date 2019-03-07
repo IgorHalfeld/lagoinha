@@ -35,10 +35,13 @@ func FetchCepAbertoService(cep string, channel chan models.Status) {
 		errorStatus.Value = parseHasErrors
 		channel <- errorStatus
 	}
-	channel <- models.Status{
-		Ok:    true,
-		Value: cepResponse,
+	res := models.Status{Ok: true}
+	if cepResponse.Cep == "" {
+		res.Value = nil
+	} else {
+		res.Value = cepResponse
 	}
+	channel <- res
 
 	defer response.Body.Close()
 }

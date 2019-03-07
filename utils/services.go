@@ -2,7 +2,6 @@ package utils
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/igorhalfeld/lagoinha/models"
 
@@ -24,7 +23,6 @@ func RaceServices(cepRaw interface{}) observable.Observable {
 		for {
 			status := <-response
 			if status.Ok {
-				fmt.Printf("Responsive is %v\n", status.Value)
 				emitter.OnNext(status.Value)
 				emitter.OnDone()
 			} else {
