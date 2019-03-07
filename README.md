@@ -12,7 +12,7 @@
 
 --- 
 
-Logoinha é basicamente um pacote que usa a API dos Correios, ViaCep e outros para pegar o endereço com base em um CEP. O que o pacote faz, é basicamente disparar pra todas as APIs ao mesmo tempo e retornar com o resultado da primeira API que responder.
+Logoinha é basicamente um pacote que usa a API dos Correios, ViaCep e outros para pegar o endereço com base em um CEP. O que o pacote faz, é disparar pra todas as APIs ao mesmo tempo e retornar com o resultado da primeira API que responder.
 
 ### Por que esse nome
 
