@@ -41,3 +41,7 @@ func main() {
 	fmt.Printf("Complete Address %v:", address)
 }
 ```
+
+### Licença
+
+[1 Coríntios 6:12](https://www.bibliaonline.com.br/nvi/1co/6/12)
