@@ -11,21 +11,6 @@ import (
 
 const cepSize = 8
 
-// ValidateInputType - Validate input cep
-func ValidateInputType(cepRaw interface{}) observable.Observable {
-	return observable.Create(func(emitter *observer.Observer, disposed bool) {
-
-		_, isString := cepRaw.(string)
-
-		if isString {
-			emitter.OnNext(cepRaw)
-			emitter.OnDone()
-		} else {
-			emitter.OnError(errors.New("Cep must be string"))
-		}
-	})
-}
-
 // ValidateInputLength - Validate input length
 func ValidateInputLength(cepRaw interface{}) observable.Observable {
 	return observable.Create(func(emitter *observer.Observer, disposed bool) {

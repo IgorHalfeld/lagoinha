@@ -34,7 +34,6 @@ func Cep(cep string) (interface{}, interface{}) {
 
 	<-observable.
 		Just(cep).
-		FlatMap(utils.ValidateInputType, 1).
 		FlatMap(utils.RemoveSpecialCharacters, 1).
 		FlatMap(utils.ValidateInputLength, 1).
 		FlatMap(utils.LeftPadWithZeros, 1).
