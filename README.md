@@ -14,7 +14,7 @@ Lagoinha é basicamente um pacote que usa a API dos Correios, ViaCep e outros pa
 
 ### Por que esse nome
 
-É simples, veja o vídeo acima!
+É simples, veja o [vídeo](https://www.youtube.com/watch?v=C1Sd_RWF5ks)!
 (onde é que eu tô, lagoinha, CEP, endereço...)
 
 ### Instalação
