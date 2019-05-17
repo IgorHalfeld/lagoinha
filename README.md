@@ -1,12 +1,10 @@
 <p align="center">
-  <a href="https://www.youtube.com/watch?v=C1Sd_RWF5ks" align="center">
-    <img src="assets/logo.png" width="100px" />
-  </a>
-  <h2 align="center">
+  <img src="assets/logo.png" width="100px" />
+  <h3 align="center">
     Lagoinha
-  </h2>
+  </h3>
   <p align="center">
-    Utilitário Golang para busca por CEP integrado diretamente aos serviços dos Correios, ViaCEP e outros <br />
+    Utilitário Golang para busca por CEP integrado diretamente <br /> aos serviços dos Correios, ViaCEP e outros
   </p>
 </p>
 
