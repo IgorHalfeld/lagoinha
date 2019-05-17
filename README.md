@@ -1,9 +1,7 @@
 <p align="center">
-  <p align="center">
-    <a href="https://www.youtube.com/watch?v=C1Sd_RWF5ks" align="center">
-      <img src="assets/logo.png" style="width: 140px" />
-    </a>
-  </p>
+  <a href="https://www.youtube.com/watch?v=C1Sd_RWF5ks" align="center">
+    <img src="assets/logo.png" width="100px" />
+  </a>
   <h2 align="center">
     Lagoinha
   </h2>
