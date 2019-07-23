@@ -1,44 +1,19 @@
 package cep
 
 import (
-	"errors"
+	"fmt"
 
-	"github.com/igorhalfeld/lagoinha/models"
 	"github.com/igorhalfeld/lagoinha/utils"
-	"github.com/reactivex/rxgo/observable"
-	"github.com/reactivex/rxgo/observer"
 )
 
 // Cep - get address
-func Cep(cep string) (interface{}, interface{}) {
-	var address interface{}
-	var err interface{}
-
-	watcher := observer.Observer{
-		NextHandler: func(item interface{}) {
-			address = item
-		},
-		ErrHandler: func(erro error) {
-			err = erro
-		},
-		DoneHandler: func() {
-			// Fix errHandler above
-			if address == nil {
-				err = models.Status{
-					Ok:    false,
-					Value: errors.New("Some happen wrong"),
-				}
-			}
-		},
+func Cep(cep string) (interface{}, error) {
+	cepValidated := utils.RemoveSpecialCharacters(cep)
+	if utils.ValidateInputLength(cepValidated) == false {
+		return nil, fmt.Errorf("Cep length exceeds maximum allowed")
 	}
+	cepValidated = utils.LeftPadWithZeros(cep)
 
-	<-observable.
-		Just(cep).
-		FlatMap(utils.RemoveSpecialCharacters, 1).
-		FlatMap(utils.ValidateInputLength, 1).
-		FlatMap(utils.LeftPadWithZeros, 1).
-		FlatMap(utils.RaceServices, 1).
-		Subscribe(watcher)
-
+	address, err := utils.RaceServices(cepValidated)
 	return address, err
 }

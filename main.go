@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	address, err := cep.Cep("CEP_GOES_HERE")
+	address, err := cep.Cep("01310200")
 	fmt.Printf("Complete Address %v:", address)
 	fmt.Printf("\nError %v:", err)
 }

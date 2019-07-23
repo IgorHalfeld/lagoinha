@@ -1,49 +1,56 @@
 package utils
 
 import (
-	"errors"
+	"fmt"
 	"regexp"
 	"strings"
 
-	"github.com/reactivex/rxgo/observable"
-	"github.com/reactivex/rxgo/observer"
+	"github.com/igorhalfeld/lagoinha/models"
+	"github.com/igorhalfeld/lagoinha/services"
 )
 
-const cepSize = 8
-
 // ValidateInputLength - Validate input length
-func ValidateInputLength(cepRaw interface{}) observable.Observable {
-	return observable.Create(func(emitter *observer.Observer, disposed bool) {
-		cep, _ := cepRaw.(string)
-		cepLength := len(cep)
-		if cepLength <= cepSize {
-			emitter.OnNext(cep)
-			emitter.OnDone()
-		} else {
-			emitter.OnError(errors.New("Cep length is less than 8 characters"))
-		}
-	})
+func ValidateInputLength(cepRaw string) (status bool) {
+	const cepSize = 8
+	cepLength := len(cepRaw)
+	if cepLength <= cepSize {
+		status = true
+	} else {
+		status = false
+	}
+	return status
 }
 
 // RemoveSpecialCharacters - Remove special characters
-func RemoveSpecialCharacters(cepRaw interface{}) observable.Observable {
-	return observable.Create(func(emitter *observer.Observer, disposed bool) {
-		cep, _ := cepRaw.(string)
-		rule := regexp.MustCompile(`\D+`)
-		cleanCep := rule.ReplaceAllString(cep, "")
-		emitter.OnNext(cleanCep)
-		emitter.OnDone()
-	})
+func RemoveSpecialCharacters(cepRaw string) (cepParsed string) {
+	rule := regexp.MustCompile(`\D+`)
+	cepParsed = rule.ReplaceAllString(cepRaw, "")
+	return cepParsed
 }
 
 // LeftPadWithZeros - Pad cep with zeros
-func LeftPadWithZeros(cepRaw interface{}) observable.Observable {
-	return observable.Create(func(emitter *observer.Observer, disposed bool) {
-		cep, _ := cepRaw.(string)
-		cepLength := len(cep)
-		timesToRepeat := cepSize - cepLength
-		pad := strings.Repeat("0", timesToRepeat)
-		emitter.OnNext(pad + cep)
-		emitter.OnDone()
-	})
+func LeftPadWithZeros(cepRaw string) (cepParsed string) {
+	const cepSize = 8
+	cepLength := len(cepRaw)
+	timesToRepeat := cepSize - cepLength
+	pad := strings.Repeat("0", timesToRepeat)
+	cepParsed = pad + cepRaw
+	return cepParsed
+}
+
+// RaceServices - run parallel and return first result
+func RaceServices(cepRaw string) (value interface{}, err error) {
+	response := make(chan models.Status)
+	go services.FetchCepCorreiosService(cepRaw, response)
+	go services.FetchViaCepService(cepRaw, response)
+	go services.FetchCepAbertoService(cepRaw, response)
+	for {
+		status := <-response
+		if status.Ok {
+			value = status.Value
+			return value, nil
+		}
+
+		return nil, fmt.Errorf("Error on fetch address from cep %s", status.Value)
+	}
 }
