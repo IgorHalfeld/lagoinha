@@ -1,33 +1,36 @@
-package utils
+package utils_test
 
-import "testing"
+import (
+	"testing"
 
-func TestRemoveSpecialCharacters(t *testing.T) {
-	cep := "01310-200"
-	cepWihoutSpecialCharacters := RemoveSpecialCharacters(cep)
-	if cepWihoutSpecialCharacters != "01310200" {
-		t.Error("Not removed special characters")
-	}
+	"github.com/igorhalfeld/lagoinha/utils"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+)
+
+func TestCEP(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "CEP Suite")
 }
 
-func TestValidateInputLength(t *testing.T) {
-	cepInvalid := "013102000"
-	cepTestI := ValidateInputLength(cepInvalid)
-	if cepTestI == true {
-		t.Error("Not validating cep length correctly")
-	}
+var _ = Describe("CEP", func() {
+	var validCepWithSpecialCharacters = "01310-200"
+	var validCepWithoutSpecialCharacters = "013102000"
+	var invalidCepWithoutSpecialCharacters = "01310200"
+	var cepThatNeedsBePadedWithZeros = "013102"
 
-	cepValid := "01310200"
-	cepTestV := ValidateInputLength(cepValid)
-	if cepTestV == false {
-		t.Error("Not validating cep length correctly")
-	}
-}
+	Describe("All helper functions should work correctly", func() {
+		It("Should remove special characters", func() {
+			Expect(utils.RemoveSpecialCharacters(validCepWithSpecialCharacters)).To(Equal("01310200"))
+		})
 
-func TestLeftPadWithZeros(t *testing.T) {
-	cep := "013102"
-	cepWithZeros := LeftPadWithZeros(cep)
-	if cepWithZeros != "00013102" {
-		t.Error("Error on padding with zeros")
-	}
-}
+		It("Should validate input length", func() {
+			Expect(utils.ValidateInputLength(invalidCepWithoutSpecialCharacters)).To(Equal(true))
+			Expect(utils.ValidateInputLength(validCepWithoutSpecialCharacters)).To(Equal(false))
+		})
+
+		It("Should pad left with zeros", func() {
+			Expect(utils.LeftPadWithZeros(cepThatNeedsBePadedWithZeros)).To(Equal("00013102"))
+		})
+	})
+})
