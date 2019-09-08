@@ -20,4 +20,4 @@ jobs:
       run: git checkout develop
 
     - name: Build
-      run: go test ./...
+      run: make tests
