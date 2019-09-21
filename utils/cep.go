@@ -44,8 +44,9 @@ func RaceServices(cepRaw string) (value interface{}, err error) {
 	go services.FetchCepCorreiosService(cepRaw, response)
 	go services.FetchViaCepService(cepRaw, response)
 	go services.FetchCepAbertoService(cepRaw, response)
-	for {
-		status := <-response
+
+	select {
+	case status := <-response:
 		if status.Ok {
 			value = status.Value
 			return value, nil

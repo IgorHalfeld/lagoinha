@@ -1,4 +1,4 @@
-package cep
+package lagoinha
 
 import (
 	"fmt"
@@ -6,8 +6,8 @@ import (
 	"github.com/igorhalfeld/lagoinha/utils"
 )
 
-// Cep - get address
-func Cep(cep string) (interface{}, error) {
+// GetAddress - get address
+func GetAddress(cep string) (interface{}, error) {
 	cepValidated := utils.RemoveSpecialCharacters(cep)
 	if utils.ValidateInputLength(cepValidated) == false {
 		return nil, fmt.Errorf("Cep length exceeds maximum allowed")

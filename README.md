@@ -31,11 +31,11 @@ package main
 import (
 	"fmt"
 
-	"github.com/igorhalfeld/lagoinha/cep"
+	"github.com/igorhalfeld/lagoinha"
 )
 
 func main() {
-	address, _ := cep.Cep("CEP_GOES_HERE")
+	address, _ := lagoinha.GetAddress("CEP_GOES_HERE")
 	fmt.Printf("Complete Address %v:", address)
 }
 ```

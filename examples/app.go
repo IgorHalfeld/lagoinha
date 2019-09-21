@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 
-	"github.com/igorhalfeld/lagoinha/cep"
+	"github.com/igorhalfeld/lagoinha"
 )
 
 func main() {
-	address, err := cep.Cep("01310200")
+	address, err := lagoinha.GetAddress("01310200")
 	fmt.Printf("Complete Address %v:", address)
 	fmt.Printf("\nError %v:", err)
 }
