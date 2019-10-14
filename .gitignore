@@ -1,2 +1,5 @@
 .DS_Store
 go.sum
+coverage_badge.png
+coverage.out
+.idea/
