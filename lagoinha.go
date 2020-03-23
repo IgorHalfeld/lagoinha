@@ -1,19 +1,21 @@
 package lagoinha
 
 import (
-	"fmt"
-
-	"github.com/igorhalfeld/lagoinha/utils"
+	"github.com/igorhalfeld/lagoinha/containers"
+	"github.com/igorhalfeld/lagoinha/handlers"
+	"github.com/igorhalfeld/lagoinha/services"
+	"github.com/igorhalfeld/lagoinha/structs"
 )
 
 // GetAddress - get address
-func GetAddress(cep string) (interface{}, error) {
-	cepValidated := utils.RemoveSpecialCharacters(cep)
-	if utils.ValidateInputLength(cepValidated) == false {
-		return nil, fmt.Errorf("Cep length exceeds maximum allowed")
-	}
-	cepValidated = utils.LeftPadWithZeros(cep)
+func GetAddress(cep string) (*structs.Cep, error) {
 
-	address, err := utils.RaceServices(cepValidated)
-	return address, err
+	con := containers.Container{
+		CorreiosService: services.NewCorreiosService(),
+		ViaCepService:   services.NewViaCepService(),
+	}
+
+	return handlers.
+		NewGetAddress(con).
+		Run(cep)
 }

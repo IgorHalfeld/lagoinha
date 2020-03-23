@@ -42,8 +42,8 @@ func LeftPadWithZeros(cepRaw string) (cepParsed string) {
 func RaceServices(cepRaw string) (value interface{}, err error) {
 	response := make(chan models.Status)
 	go services.FetchCepCorreiosService(cepRaw, response)
-	go services.FetchViaCepService(cepRaw, response)
-	go services.FetchCepAbertoService(cepRaw, response)
+	// go services.FetchViaCepService(cepRaw, response)
+	// go services.FetchCepAbertoService(cepRaw, response)
 
 	select {
 	case status := <-response:

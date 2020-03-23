@@ -2,35 +2,51 @@ package services
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
-	"github.com/igorhalfeld/lagoinha/models"
+	"github.com/igorhalfeld/lagoinha/structs"
 )
 
-// FetchViaCepService - fetch data from viacep api
-func FetchViaCepService(cep string, channel chan models.Status) {
-	response, fetchError := http.Get("https://viacep.com.br/ws/" + cep + "/json/")
-	cepResponse := models.ViaCepResponse{}
-	errorStatus := models.Status{Ok: false}
+// ViaCepService service
+type ViaCepService struct{}
 
-	if fetchError != nil {
-		errorStatus.Value = fetchError
-		channel <- errorStatus
+// NewViaCepService creates a new instance
+func NewViaCepService() *ViaCepService {
+	return &ViaCepService{}
+}
+
+// Request - fetch data from viacep api
+func (vc *ViaCepService) Request(cep string) (*structs.Cep, error) {
+	result := structs.ViaCepResponse{}
+
+	res, err := http.Get("https://viacep.com.br/ws/" + cep + "/json/")
+	if err != nil {
+		return nil, err
 	}
 
-	parseHasErrors := json.NewDecoder(response.Body).Decode(&cepResponse)
-	if parseHasErrors != nil {
-		errorStatus.Value = parseHasErrors
-		channel <- errorStatus
+	defer res.Body.Close()
+
+	err = json.NewDecoder(res.Body).Decode(&result)
+	if err != nil {
+		return nil, err
 	}
 
-	res := models.Status{Ok: true}
-	if cepResponse.Cep == "" {
-		res.Value = nil
-	} else {
-		res.Value = cepResponse
-	}
-	channel <- res
+	return vc.formater(&result)
+}
 
-	defer response.Body.Close()
+func (vc *ViaCepService) formater(r *structs.ViaCepResponse) (*structs.Cep, error) {
+	if r == nil {
+		return nil, errors.New("Cep not found")
+	}
+
+	cep := &structs.Cep{
+		Cep:          r.Cep,
+		City:         r.City,
+		Neighborhood: r.Neighborhood,
+		State:        r.State,
+		Street:       r.Street,
+	}
+
+	return cep, nil
 }
