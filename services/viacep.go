@@ -32,6 +32,7 @@ func (vc *ViaCepService) Request(cep string) (*structs.Cep, error) {
 		return nil, err
 	}
 
+
 	return vc.formater(&result)
 }
 

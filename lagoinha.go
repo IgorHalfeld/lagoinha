@@ -1,21 +1,56 @@
 package lagoinha
 
 import (
-	"github.com/igorhalfeld/lagoinha/containers"
-	"github.com/igorhalfeld/lagoinha/handlers"
+	"reflect"
+
 	"github.com/igorhalfeld/lagoinha/services"
 	"github.com/igorhalfeld/lagoinha/structs"
+	"github.com/igorhalfeld/lagoinha/utils"
 )
 
 // GetAddress - get address
 func GetAddress(cep string) (*structs.Cep, error) {
-
-	con := containers.Container{
+	services := services.Container{
 		CorreiosService: services.NewCorreiosService(),
 		ViaCepService:   services.NewViaCepService(),
 	}
 
-	return handlers.
-		NewGetAddress(con).
-		Run(cep)
+	cepValidated := utils.RemoveSpecialCharacters(cep)
+	cepValidated = utils.LeftPadWithZeros(cep)
+
+	respCh := make(chan *structs.Cep)
+	errCh := make(chan error)
+
+	var servicesCount int = reflect.TypeOf(services).NumField()
+	var errorsCount []error
+
+	go func(cv string) {
+		c, err := services.CorreiosService.Request(cv)
+		if err != nil {
+			errorsCount = append(errorsCount, err)
+			if len(errorsCount) > servicesCount {
+				errCh <- err
+			}
+		}
+		if c != nil {
+			respCh <- c
+			errCh <- nil
+		}
+	}(cepValidated)
+
+	go func(cv string) {
+		c, err := services.ViaCepService.Request(cv)
+		if err != nil {
+			errorsCount = append(errorsCount, err)
+			if len(errorsCount) > servicesCount {
+				errCh <- err
+			}
+		}
+		if c != nil {
+			respCh <- c
+			errCh <- nil
+		}
+	}(cepValidated)
+
+	return <-respCh, <-errCh
 }
