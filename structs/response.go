@@ -15,6 +15,15 @@ type ViaCepResponse struct {
 	Street       string `json:"logradouro"`
 }
 
+// WidenetResponse Widenet response
+type WidenetResponse struct {
+	Cep          string `json:"code"`
+	State        string `json:"state"`
+	City         string `json:"city"`
+	Neighborhood string `json:"district"`
+	Street       string `json:"address"`
+}
+
 // CorreiosResponse Correios response
 type CorreiosResponse struct {
 	Body struct {

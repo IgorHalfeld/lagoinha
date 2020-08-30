@@ -7,4 +7,5 @@ type Cep struct {
 	Neighborhood string `json:"neighborhood"`
 	City         string `json:"city"`
 	State        string `json:"state"`
+	Provider     string `json:"provider"`
 }

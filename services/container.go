@@ -11,4 +11,5 @@ type ServiceInterface interface {
 type Container struct {
 	CorreiosService ServiceInterface
 	ViaCepService   ServiceInterface
+	WidenetService  ServiceInterface
 }

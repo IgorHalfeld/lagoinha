@@ -13,6 +13,7 @@ func GetAddress(cep string) (*structs.Cep, error) {
 	services := services.Container{
 		CorreiosService: services.NewCorreiosService(),
 		ViaCepService:   services.NewViaCepService(),
+		WidenetService:  services.NewWidenetService(),
 	}
 
 	cepValidated := utils.RemoveSpecialCharacters(cep)
@@ -40,6 +41,20 @@ func GetAddress(cep string) (*structs.Cep, error) {
 
 	go func(cv string) {
 		c, err := services.ViaCepService.Request(cv)
+		if err != nil {
+			errorsCount = append(errorsCount, err)
+			if len(errorsCount) > servicesCount {
+				errCh <- err
+			}
+		}
+		if c != nil {
+			respCh <- c
+			errCh <- nil
+		}
+	}(cepValidated)
+
+	go func(cv string) {
+		c, err := services.WidenetService.Request(cv)
 		if err != nil {
 			errorsCount = append(errorsCount, err)
 			if len(errorsCount) > servicesCount {

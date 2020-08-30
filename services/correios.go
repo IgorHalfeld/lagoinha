@@ -67,6 +67,7 @@ func (cs *CorreiosService) formater(r *structs.CorreiosResponse) (*structs.Cep, 
 		Cep:          r.Body.Consult.Return.Cep,
 		City:         r.Body.Consult.Return.City,
 		Neighborhood: r.Body.Consult.Return.Neighborhood,
+		Provider:     "Correios",
 	}
 
 	return cep, nil
