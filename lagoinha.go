@@ -29,8 +29,9 @@ func GetAddress(cep string) (*structs.Cep, error) {
 		c, err := services.CorreiosService.Request(cv)
 		if err != nil {
 			errorsCount = append(errorsCount, err)
-			if len(errorsCount) > servicesCount {
+			if len(errorsCount) == servicesCount {
 				errCh <- err
+				respCh <- nil
 			}
 		}
 		if c != nil {
@@ -43,8 +44,9 @@ func GetAddress(cep string) (*structs.Cep, error) {
 		c, err := services.ViaCepService.Request(cv)
 		if err != nil {
 			errorsCount = append(errorsCount, err)
-			if len(errorsCount) > servicesCount {
+			if len(errorsCount) == servicesCount {
 				errCh <- err
+				respCh <- nil
 			}
 		}
 		if c != nil {
@@ -57,8 +59,9 @@ func GetAddress(cep string) (*structs.Cep, error) {
 		c, err := services.WidenetService.Request(cv)
 		if err != nil {
 			errorsCount = append(errorsCount, err)
-			if len(errorsCount) > servicesCount {
+			if len(errorsCount) == servicesCount {
 				errCh <- err
+				respCh <- nil
 			}
 		}
 		if c != nil {
