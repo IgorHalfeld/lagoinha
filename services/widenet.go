@@ -9,18 +9,18 @@ import (
 )
 
 // ViaCepService service
-type ViaCepService struct{}
+type WidenetService struct{}
 
 // NewViaCepService creates a new instance
-func NewViaCepService() *ViaCepService {
-	return &ViaCepService{}
+func NewWidenetService() *WidenetService {
+	return &WidenetService{}
 }
 
 // Request - fetch data from viacep api
-func (vc *ViaCepService) Request(cep string) (*structs.Cep, error) {
-	result := structs.ViaCepResponse{}
+func (wn *WidenetService) Request(cep string) (*structs.Cep, error) {
+	result := structs.WidenetResponse{}
 
-	res, err := http.Get("https://viacep.com.br/ws/" + cep + "/json/")
+	res, err := http.Get("http://apps.widenet.com.br/busca-cep/api/cep/" + cep + ".json")
 	if err != nil {
 		return nil, err
 	}
@@ -32,10 +32,10 @@ func (vc *ViaCepService) Request(cep string) (*structs.Cep, error) {
 		return nil, err
 	}
 
-	return vc.formater(&result)
+	return wn.formater(&result)
 }
 
-func (vc *ViaCepService) formater(r *structs.ViaCepResponse) (*structs.Cep, error) {
+func (wn *WidenetService) formater(r *structs.WidenetResponse) (*structs.Cep, error) {
 	if r == nil {
 		return nil, errors.New("Cep not found")
 	}
@@ -46,7 +46,7 @@ func (vc *ViaCepService) formater(r *structs.ViaCepResponse) (*structs.Cep, erro
 		Neighborhood: r.Neighborhood,
 		State:        r.State,
 		Street:       r.Street,
-		Provider:     "Viacep",
+		Provider:     "Widenet",
 	}
 
 	return cep, nil

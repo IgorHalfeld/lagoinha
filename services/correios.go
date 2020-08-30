@@ -3,17 +3,26 @@ package services
 import (
 	"bytes"
 	"encoding/xml"
+	"errors"
 	"net/http"
 
-	"github.com/igorhalfeld/lagoinha/models"
+	"github.com/igorhalfeld/lagoinha/structs"
 )
 
-// FetchCepCorreiosService - fetch data from correios api
-func FetchCepCorreiosService(cep string, channel chan models.Status) {
+// CorreiosService service
+type CorreiosService struct{}
+
+// NewCorreiosService creates a new instance
+func NewCorreiosService() *CorreiosService {
+	return &CorreiosService{}
+}
+
+// Request - fetch data from correios api
+func (cs *CorreiosService) Request(cep string) (*structs.Cep, error) {
 	const proxyURL = "https://proxier.now.sh/"
 	client := &http.Client{}
-	cepResponse := models.CorreiosResponse{}
-	errorStatus := models.Status{Ok: false}
+
+	result := structs.CorreiosResponse{}
 
 	url := proxyURL + "https://apps.correios.com.br/SigepMasterJPA/AtendeClienteService/AtendeCliente?wsdl"
 	payload := `
@@ -26,34 +35,40 @@ func FetchCepCorreiosService(cep string, channel chan models.Status) {
 				</soapenv:Body>
 			</soapenv:Envelope>
 		`
-
-	request, createRequestError := http.NewRequest("POST", url, bytes.NewBufferString(payload))
-	if createRequestError != nil {
-		errorStatus.Value = createRequestError
-		channel <- errorStatus
-	}
-	request.Header.Set("content-type", "application/soap+xml;charset=utf-8")
-	request.Header.Set("cache-control", "no-cache")
-
-	response, fetchError := client.Do(request)
-	if fetchError != nil {
-		errorStatus.Value = fetchError
-		channel <- errorStatus
+	req, err := http.NewRequest("POST", url, bytes.NewBufferString(payload))
+	if err != nil {
+		return nil, err
 	}
 
-	parseHasErrors := xml.NewDecoder(response.Body).Decode(&cepResponse)
-	if parseHasErrors != nil {
-		errorStatus.Value = parseHasErrors
-		channel <- errorStatus
+	req.Header.Set("content-type", "application/soap+xml;charset=utf-8")
+	req.Header.Set("cache-control", "no-cache")
+
+	res, err := client.Do(req)
+	if err != nil {
+		return nil, err
 	}
 
-	res := models.Status{Ok: true}
-	if cepResponse.Body.Consult.Return.Cep == "" {
-		res.Value = nil
-	} else {
-		res.Value = cepResponse.Body.Consult.Return
-	}
-	channel <- res
+	defer res.Body.Close()
 
-	defer response.Body.Close()
+	err = xml.NewDecoder(res.Body).Decode(&result)
+	if err != nil {
+		return nil, err
+	}
+
+	return cs.formater(&result)
+}
+
+func (cs *CorreiosService) formater(r *structs.CorreiosResponse) (*structs.Cep, error) {
+	if r == nil {
+		return nil, errors.New("Cep not found")
+	}
+
+	cep := &structs.Cep{
+		Cep:          r.Body.Consult.Return.Cep,
+		City:         r.Body.Consult.Return.City,
+		Neighborhood: r.Body.Consult.Return.Neighborhood,
+		Provider:     "Correios",
+	}
+
+	return cep, nil
 }
