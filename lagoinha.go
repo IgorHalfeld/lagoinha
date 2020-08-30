@@ -25,6 +25,8 @@ func GetAddress(cep string) (*structs.Cep, error) {
 	var servicesCount int = reflect.TypeOf(services).NumField()
 	var errorsCount []error
 
+	// If services be more than 3,
+	// dispatch this goroutines dynamically
 	go func(cv string) {
 		c, err := services.CorreiosService.Request(cv)
 		if err != nil {
