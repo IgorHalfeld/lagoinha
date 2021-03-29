@@ -1,13 +1,16 @@
 package main
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/igorhalfeld/lagoinha"
 )
 
 func main() {
 	address, err := lagoinha.GetAddress("01310200")
-	fmt.Printf("Complete Address %v:", address)
-	fmt.Printf("\nError %v:", err)
+	if err != nil {
+		log.Fatalf("\nError %v:", err)
+	}
+
+	log.Printf("Complete Address %v:", address)
 }

@@ -9,15 +9,20 @@ import (
 )
 
 // ViaCepService service
-type ViaCepService struct{}
+type ViaCepService interface {
+	Request(cep string) (*structs.Cep, error)
+}
+
+type viaCepImpl struct {
+}
 
 // NewViaCepService creates a new instance
-func NewViaCepService() *ViaCepService {
-	return &ViaCepService{}
+func NewViaCepService() ViaCepService {
+	return &viaCepImpl{}
 }
 
 // Request - fetch data from viacep api
-func (vc *ViaCepService) Request(cep string) (*structs.Cep, error) {
+func (vc *viaCepImpl) Request(cep string) (*structs.Cep, error) {
 	result := structs.ViaCepResponse{}
 
 	res, err := http.Get("https://viacep.com.br/ws/" + cep + "/json/")
@@ -35,7 +40,7 @@ func (vc *ViaCepService) Request(cep string) (*structs.Cep, error) {
 	return vc.formater(&result)
 }
 
-func (vc *ViaCepService) formater(r *structs.ViaCepResponse) (*structs.Cep, error) {
+func (vc *viaCepImpl) formater(r *structs.ViaCepResponse) (*structs.Cep, error) {
 	if r == nil {
 		return nil, errors.New("Cep not found")
 	}

@@ -10,15 +10,19 @@ import (
 )
 
 // CorreiosService service
-type CorreiosService struct{}
+type CorreiosService interface {
+	Request(cep string) (*structs.Cep, error)
+}
+
+type correiosImpl struct{}
 
 // NewCorreiosService creates a new instance
-func NewCorreiosService() *CorreiosService {
-	return &CorreiosService{}
+func NewCorreiosService() CorreiosService {
+	return &correiosImpl{}
 }
 
 // Request - fetch data from correios api
-func (cs *CorreiosService) Request(cep string) (*structs.Cep, error) {
+func (cs *correiosImpl) Request(cep string) (*structs.Cep, error) {
 	const proxyURL = "https://proxier.now.sh/"
 	client := &http.Client{}
 
@@ -58,7 +62,7 @@ func (cs *CorreiosService) Request(cep string) (*structs.Cep, error) {
 	return cs.formater(&result)
 }
 
-func (cs *CorreiosService) formater(r *structs.CorreiosResponse) (*structs.Cep, error) {
+func (cs *correiosImpl) formater(r *structs.CorreiosResponse) (*structs.Cep, error) {
 	if r == nil {
 		return nil, errors.New("Cep not found")
 	}
