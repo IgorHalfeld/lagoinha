@@ -4,4 +4,4 @@ test:
 badge:
 	gopherbadger > /dev/null
 
-tests: test badge
+tests: test
