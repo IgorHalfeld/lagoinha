@@ -15,6 +15,9 @@ jobs:
 
     - name: Check out code into the Go module directory
       uses: actions/checkout@v1
+
+    - name: Get deps
+      run: go get github.com/jpoles1/gopherbadger
   
     - name: Run tests
       run: make tests
