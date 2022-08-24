@@ -36,8 +36,14 @@ import (
 )
 
 func main() {
-	address, _ := lagoinha.GetAddress("CEP_GOES_HERE")
-	fmt.Printf("Complete Address %v:", address)
+	chResp, chErr := lagoinha.GetAddress("04568000")
+
+	select {
+	case address := <-chResp:
+		fmt.Printf("Response: %+v\n", address)
+	case err := <-chErr:
+		fmt.Printf("Error: %+v\n", err)
+	}
 }
 ```
 

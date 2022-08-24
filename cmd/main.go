@@ -13,6 +13,6 @@ func main() {
 	case address := <-chResp:
 		fmt.Printf("Response: %+v\n", address)
 	case err := <-chErr:
-		fmt.Printf("Response: %+v\n", err)
+		fmt.Printf("Error: %+v\n", err)
 	}
 }
