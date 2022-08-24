@@ -3,23 +3,28 @@ package lagoinha
 import (
 	"reflect"
 
+	"github.com/igorhalfeld/lagoinha/internal/entity"
 	"github.com/igorhalfeld/lagoinha/services"
-	"github.com/igorhalfeld/lagoinha/structs"
-	"github.com/igorhalfeld/lagoinha/utils"
 )
 
 // GetAddress - get address
-func GetAddress(cep string) (*structs.Cep, error) {
+func GetAddress(cepRaw string) (*entity.Cep, error) {
+	cep := entity.Cep{
+		Cep: cepRaw,
+	}
+	cep.ApplyFormaterAndLinters()
+
+	if !cep.IsValid() {
+		return nil, CepNotValidError
+	}
+
 	services := services.Container{
 		CorreiosService: services.NewCorreiosService(),
 		ViaCepService:   services.NewViaCepService(),
 		WidenetService:  services.NewWidenetService(),
 	}
 
-	cepValidated := utils.RemoveSpecialCharacters(cep)
-	cepValidated = utils.LeftPadWithZeros(cep)
-
-	respCh := make(chan *structs.Cep)
+	respCh := make(chan *entity.Cep)
 	errCh := make(chan error)
 
 	var servicesCount int = reflect.TypeOf(services).NumField()
@@ -40,7 +45,7 @@ func GetAddress(cep string) (*structs.Cep, error) {
 			respCh <- c
 			errCh <- nil
 		}
-	}(cepValidated)
+	}(cep.Cep)
 
 	go func(cv string) {
 		c, err := services.ViaCepService.Request(cv)
