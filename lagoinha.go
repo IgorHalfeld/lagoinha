@@ -2,6 +2,7 @@ package lagoinha
 
 import (
 	"github.com/igorhalfeld/lagoinha/internal/entity"
+	"github.com/igorhalfeld/lagoinha/internal/service/viacep"
 	"github.com/igorhalfeld/lagoinha/pkg/errors"
 )
 
@@ -15,7 +16,16 @@ func getAddress(cepRaw string, chResponse chan *entity.Cep, chError chan error) 
 		return
 	}
 
-	chResponse <- &cep
+	go func(cv string) {
+		service := viacep.New()
+		c, err := service.Request(cv)
+		if err != nil {
+			chError <- err
+			return
+		}
+
+		chResponse <- c
+	}(cep.Cep)
 }
 
 // GetAddress - get address

@@ -12,7 +12,7 @@ import (
 type CorreiosService struct{}
 
 func New() CorreiosService {
-	return &correiosImpl{}
+	return &CorreiosService{}
 }
 
 // Request - fetch data from correios api
