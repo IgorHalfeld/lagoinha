@@ -1,16 +1,18 @@
 package main
 
 import (
-	"log"
+	"fmt"
 
 	"github.com/igorhalfeld/lagoinha"
 )
 
 func main() {
-	address, err := lagoinha.GetAddress("01310200")
-	if err != nil {
-		log.Fatalf("\nError %v:", err)
-	}
+	chResp, chErr := lagoinha.GetAddress("")
 
-	log.Printf("Complete Address %v:", address)
+	select {
+	case address := <-chResp:
+		fmt.Printf("Response: %+v\n", address)
+	case err := <-chErr:
+		fmt.Printf("Response: %+v\n", err)
+	}
 }
