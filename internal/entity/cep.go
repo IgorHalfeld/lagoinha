@@ -1,6 +1,9 @@
 package entity
 
-import "github.com/igorhalfeld/lagoinha/pkg/validator"
+import (
+	"github.com/igorhalfeld/lagoinha/pkg/formater"
+	"github.com/igorhalfeld/lagoinha/pkg/validator"
+)
 
 // Cep standard cep struct
 type Cep struct {
@@ -12,13 +15,16 @@ type Cep struct {
 	Provider     string `json:"provider"`
 }
 
-func (c *Cep) ApplyFormaterAndLinters() {
-	c.Cep = validator.RemoveSpecialCharacters(c.Cep)
-	c.Cep = validator.LeftPadWithZeros(c.Cep)
-}
-
 func (c *Cep) IsValid() bool {
-	return validator.ValidateInputLength(c.Cep)
+	c.Cep = formater.RemoveSpecialCharacters(c.Cep)
+
+	if c.Cep == "" || validator.ExceedsCepMaximumSize(c.Cep) {
+		return false
+	}
+
+	c.Cep = formater.LeftPadWithZeros(c.Cep)
+
+	return true
 }
 
 func (c *Cep) HasAllAddressInfo() bool {
