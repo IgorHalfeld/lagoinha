@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	chResp, chErr := lagoinha.GetAddress("04568000")
+	chResp, chErr := lagoinha.GetAddress("04568000", nil)
 
 	select {
 	case address := <-chResp:

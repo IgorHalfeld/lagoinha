@@ -40,8 +40,12 @@ func getAddress(cepRaw string, chResponse chan *entity.Cep, chError chan error) 
 	}(cep.Cep)
 }
 
+type GetAddressOptions struct {
+	PreferenceForAPI string
+}
+
 // GetAddress - get address
-func GetAddress(cepRaw string) (chan *entity.Cep, chan error) {
+func GetAddress(cepRaw string, _ *GetAddressOptions) (chan *entity.Cep, chan error) {
 	chResponse := make(chan *entity.Cep)
 	chError := make(chan error)
 
