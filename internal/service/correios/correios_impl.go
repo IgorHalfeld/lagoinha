@@ -6,17 +6,17 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/igorhalfeld/lagoinha/structs"
+	"github.com/igorhalfeld/lagoinha/internal/entity"
 )
 
 type CorreiosService struct{}
 
-func New() CorreiosService {
+func New() *CorreiosService {
 	return &CorreiosService{}
 }
 
 // Request - fetch data from correios api
-func (cs *CorreiosService) Request(cep string) (*structs.Cep, error) {
+func (cs *CorreiosService) Request(cep string) (*entity.Cep, error) {
 	const proxyURL = "https://proxier.now.sh/"
 	client := &http.Client{}
 
@@ -56,12 +56,12 @@ func (cs *CorreiosService) Request(cep string) (*structs.Cep, error) {
 	return cs.formater(&result)
 }
 
-func (cs *CorreiosService) formater(r *structs.CorreiosResponse) (*structs.Cep, error) {
+func (cs *CorreiosService) formater(r *correiosResponse) (*entity.Cep, error) {
 	if r == nil {
 		return nil, errors.New("Cep not found")
 	}
 
-	cep := &structs.Cep{
+	cep := &entity.Cep{
 		Cep:          r.Body.Consult.Return.Cep,
 		City:         r.Body.Consult.Return.City,
 		Neighborhood: r.Body.Consult.Return.Neighborhood,

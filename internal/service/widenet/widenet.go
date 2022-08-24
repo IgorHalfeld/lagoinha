@@ -5,18 +5,17 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/igorhalfeld/lagoinha/structs"
+	"github.com/igorhalfeld/lagoinha/internal/entity"
 )
 
 type WidenetService struct{}
 
-// NewViaCepService creates a new instance
-func NewWidenetService() WidenetService {
-	return &widenetImpl{}
+func New() *WidenetService {
+	return &WidenetService{}
 }
 
 // Request - fetch data from viacep api
-func (wn *WidenetService) Request(cep string) (*structs.Cep, error) {
+func (wn *WidenetService) Request(cep string) (*entity.Cep, error) {
 	result := widenetResponse{}
 
 	res, err := http.Get("http://apps.widenet.com.br/busca-cep/api/cep/" + cep + ".json")
@@ -34,12 +33,12 @@ func (wn *WidenetService) Request(cep string) (*structs.Cep, error) {
 	return wn.formater(&result)
 }
 
-func (wn *WidenetService) formater(r *structs.WidenetResponse) (*structs.Cep, error) {
+func (wn *WidenetService) formater(r *widenetResponse) (*entity.Cep, error) {
 	if r == nil {
 		return nil, errors.New("Cep not found")
 	}
 
-	cep := &structs.Cep{
+	cep := &entity.Cep{
 		Cep:          r.Cep,
 		City:         r.City,
 		Neighborhood: r.Neighborhood,

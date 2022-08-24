@@ -2,20 +2,20 @@ package brasilapi
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 
 	"github.com/igorhalfeld/lagoinha/internal/entity"
+	"github.com/igorhalfeld/lagoinha/pkg/errors"
 )
 
 type BrasilAPIService struct {
 }
 
-func New() BrasilAPI {
-	return &BrasilAPI{}
+func New() *BrasilAPIService {
+	return &BrasilAPIService{}
 }
 
-func (ba *BrasilAPI) Request(cep string) (*entity.Cep, error) {
+func (ba *BrasilAPIService) Request(cep string) (*entity.Cep, error) {
 	result := brasilAPIResponse{}
 
 	res, err := http.Get("https://brasilapi.com.br/api/cep/v1/" + cep)
@@ -30,10 +30,10 @@ func (ba *BrasilAPI) Request(cep string) (*entity.Cep, error) {
 		return nil, err
 	}
 
-	return vc.formater(&result)
+	return ba.formater(&result)
 }
 
-func (ba *BrasilAPI) formater(r *BrasilAPIResponse) (*entity.Cep, error) {
+func (ba *BrasilAPIService) formater(r *brasilAPIResponse) (*entity.Cep, error) {
 	if r == nil {
 		return nil, errors.CepNotFoundError
 	}
