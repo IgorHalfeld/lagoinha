@@ -1,4 +1,4 @@
-package services
+package viacep
 
 import (
 	"encoding/json"
@@ -8,12 +8,7 @@ import (
 	"github.com/igorhalfeld/lagoinha/structs"
 )
 
-// ViaCepService service
-type ViaCepService interface {
-	Request(cep string) (*structs.Cep, error)
-}
-
-type viaCepImpl struct {
+type ViaCepService struct {
 }
 
 // NewViaCepService creates a new instance
@@ -22,8 +17,8 @@ func NewViaCepService() ViaCepService {
 }
 
 // Request - fetch data from viacep api
-func (vc *viaCepImpl) Request(cep string) (*structs.Cep, error) {
-	result := structs.ViaCepResponse{}
+func (vc *ViaCepService) Request(cep string) (*structs.Cep, error) {
+	result := viaCepResponse{}
 
 	res, err := http.Get("https://viacep.com.br/ws/" + cep + "/json/")
 	if err != nil {
@@ -40,7 +35,7 @@ func (vc *viaCepImpl) Request(cep string) (*structs.Cep, error) {
 	return vc.formater(&result)
 }
 
-func (vc *viaCepImpl) formater(r *structs.ViaCepResponse) (*structs.Cep, error) {
+func (vc *ViaCepService) formater(r *structs.ViaCepResponse) (*structs.Cep, error) {
 	if r == nil {
 		return nil, errors.New("Cep not found")
 	}

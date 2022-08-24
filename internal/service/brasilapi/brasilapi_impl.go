@@ -8,7 +8,7 @@ import (
 	"github.com/igorhalfeld/lagoinha/internal/entity"
 )
 
-type BrasilAPI struct {
+type BrasilAPIService struct {
 }
 
 func New() BrasilAPI {
@@ -16,7 +16,7 @@ func New() BrasilAPI {
 }
 
 func (ba *BrasilAPI) Request(cep string) (*entity.Cep, error) {
-	result := BrasilAPIResponse{}
+	result := brasilAPIResponse{}
 
 	res, err := http.Get("https://brasilapi.com.br/api/cep/v1/" + cep)
 	if err != nil {
