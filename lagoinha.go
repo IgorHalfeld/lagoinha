@@ -20,6 +20,7 @@ func getAddress(cepRaw string, chResponse chan *entity.Cep, chError chan error) 
 		return
 	}
 
+	// TODO: add context.WithCancel for slower requests
 	go func(cv string) {
 		service := viacep.New()
 		c, err := service.Request(cv)
