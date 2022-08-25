@@ -7,6 +7,9 @@ import (
 	"github.com/igorhalfeld/lagoinha/pkg/errors"
 )
 
+// TotalAmountOfCepProviders returns amount of current enabled cep provivers
+const TotalAmountOfCepProviders = 2
+
 func getAddress(cepRaw string, chResponse chan *entity.Cep, chError chan error) {
 	cep := entity.Cep{
 		Cep: cepRaw,
@@ -46,7 +49,7 @@ type GetAddressOptions struct {
 
 // GetAddress - get address
 func GetAddress(cepRaw string, _ *GetAddressOptions) (chan *entity.Cep, chan error) {
-	chResponse := make(chan *entity.Cep)
+	chResponse := make(chan *entity.Cep, TotalAmountOfCepProviders)
 	chError := make(chan error)
 
 	go getAddress(cepRaw, chResponse, chError)
