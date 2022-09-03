@@ -2,10 +2,10 @@ package viacep
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 
 	"github.com/igorhalfeld/lagoinha/internal/entity"
+	"github.com/igorhalfeld/lagoinha/pkg/errors"
 )
 
 type ViaCepService struct {
@@ -37,7 +37,7 @@ func (vc *ViaCepService) Request(cep string) (*entity.Cep, error) {
 
 func (vc *ViaCepService) formater(r *viaCepResponse) (*entity.Cep, error) {
 	if r == nil {
-		return nil, errors.New("Cep not found")
+		return nil, errors.CepNotFoundError
 	}
 
 	cep := &entity.Cep{
@@ -46,7 +46,7 @@ func (vc *ViaCepService) formater(r *viaCepResponse) (*entity.Cep, error) {
 		Neighborhood: r.Neighborhood,
 		State:        r.State,
 		Street:       r.Street,
-		Provider:     "Viacep",
+		Provider:     "ViaCEP",
 	}
 
 	return cep, nil
