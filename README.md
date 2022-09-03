@@ -47,4 +47,12 @@ func main() {
 }
 ```
 
+você também pode setar uma api de preferência
+
+```golang
+chResp, chErr := lagoinha.GetAddress("04568000", &lagoinha.GetAddressOptions{
+	PreferenceForAPI: "ViaCEP",
+})
+```
+
 logo by [@nelsonsecco](https://twitter.com/nelsonsecco)
