@@ -7,7 +7,10 @@ import (
 )
 
 func main() {
-	chResp, chErr := lagoinha.GetAddress("04568000", nil)
+	fmt.Println("Total amount of cep providers:", lagoinha.GetTotalAmountOfCepProviders())
+	chResp, chErr := lagoinha.GetAddress("04568000", &lagoinha.GetAddressOptions{
+		PreferenceForAPI: "ViaCEP",
+	})
 
 	select {
 	case address := <-chResp:

@@ -36,6 +36,8 @@ import (
 )
 
 func main() {
+	// get amount of cep providers enabled
+	fmt.Println("Total amount of cep providers:", lagoinha.GetTotalAmountOfCepProviders())
 	chResp, chErr := lagoinha.GetAddress("04568000")
 
 	select {
