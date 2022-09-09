@@ -1,76 +1,79 @@
 package lagoinha
 
 import (
-	"reflect"
-
-	"github.com/igorhalfeld/lagoinha/services"
-	"github.com/igorhalfeld/lagoinha/structs"
-	"github.com/igorhalfeld/lagoinha/utils"
+	"github.com/igorhalfeld/lagoinha/internal/entity"
+	"github.com/igorhalfeld/lagoinha/internal/service"
+	"github.com/igorhalfeld/lagoinha/internal/service/apicep"
+	"github.com/igorhalfeld/lagoinha/internal/service/brasilapi"
+	"github.com/igorhalfeld/lagoinha/internal/service/viacep"
+	"github.com/igorhalfeld/lagoinha/pkg/errors"
 )
 
-// GetAddress - get address
-func GetAddress(cep string) (*structs.Cep, error) {
-	services := services.Container{
-		CorreiosService: services.NewCorreiosService(),
-		ViaCepService:   services.NewViaCepService(),
-		WidenetService:  services.NewWidenetService(),
+var providers = map[string]service.Provider{
+	"BrasilAPI": brasilapi.New(),
+	"ViaCEP":    viacep.New(),
+	"Apicep":    apicep.New(),
+}
+
+// GetTotalAmountOfCepProviders returns amount of current enabled cep provivers
+func GetTotalAmountOfCepProviders() int {
+	return len(providers)
+}
+
+func getAddress(cepRaw string, opts *GetAddressOptions, chResponse chan *entity.Cep, chError chan error) {
+	cep := entity.Cep{
+		Cep: cepRaw,
 	}
 
-	cepValidated := utils.RemoveSpecialCharacters(cep)
-	cepValidated = utils.LeftPadWithZeros(cep)
+	if !cep.IsValid() {
+		chError <- errors.CepNotValidError
+		return
+	}
 
-	respCh := make(chan *structs.Cep)
-	errCh := make(chan error)
-
-	var servicesCount int = reflect.TypeOf(services).NumField()
-	var errorsCount []error
-
-	// @TODO: If services be more than 3,
-	// dispatch this goroutines dynamically
-	go func(cv string) {
-		c, err := services.CorreiosService.Request(cv)
-		if err != nil {
-			errorsCount = append(errorsCount, err)
-			if len(errorsCount) == servicesCount {
-				errCh <- err
-				respCh <- nil
+	// TODO: enhance this way of handling options
+	if opts != nil {
+		if opts.PreferenceForAPI != "" {
+			provider, ok := providers[opts.PreferenceForAPI]
+			if !ok {
+				chError <- errors.PreferenceProviderNotFound
+				return
 			}
-		}
-		if c != nil {
-			respCh <- c
-			errCh <- nil
-		}
-	}(cepValidated)
 
-	go func(cv string) {
-		c, err := services.ViaCepService.Request(cv)
-		if err != nil {
-			errorsCount = append(errorsCount, err)
-			if len(errorsCount) == servicesCount {
-				errCh <- err
-				respCh <- nil
+			c, err := provider.Request(cep.Cep)
+			if err != nil {
+				chError <- err
+				return
 			}
-		}
-		if c != nil {
-			respCh <- c
-			errCh <- nil
-		}
-	}(cepValidated)
 
-	go func(cv string) {
-		c, err := services.WidenetService.Request(cv)
-		if err != nil {
-			errorsCount = append(errorsCount, err)
-			if len(errorsCount) == servicesCount {
-				errCh <- err
-				respCh <- nil
+			chResponse <- c
+			return
+		}
+	}
+
+	// TODO: add context.WithCancel for slower requests
+	for providerName := range providers {
+		go func(p, cv string) {
+			c, err := providers[p].Request(cv)
+			if err != nil {
+				chError <- err
+				return
 			}
-		}
-		if c != nil {
-			respCh <- c
-			errCh <- nil
-		}
-	}(cepValidated)
 
-	return <-respCh, <-errCh
+			chResponse <- c
+		}(providerName, cep.Cep)
+	}
+}
+
+type GetAddressOptions struct {
+	PreferenceForAPI string
+}
+
+// GetAddress - get address
+func GetAddress(cepRaw string, opts *GetAddressOptions) (chan *entity.Cep, chan error) {
+	chResponse := make(chan *entity.Cep, GetTotalAmountOfCepProviders())
+	chError := make(chan error)
+
+	go getAddress(cepRaw, opts, chResponse, chError)
+
+	return chResponse, chError
 }

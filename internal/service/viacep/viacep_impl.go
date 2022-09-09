@@ -1,29 +1,24 @@
-package services
+package viacep
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 
-	"github.com/igorhalfeld/lagoinha/structs"
+	"github.com/igorhalfeld/lagoinha/internal/entity"
+	"github.com/igorhalfeld/lagoinha/pkg/errors"
 )
 
-// ViaCepService service
-type ViaCepService interface {
-	Request(cep string) (*structs.Cep, error)
-}
-
-type viaCepImpl struct {
+type ViaCepService struct {
 }
 
 // NewViaCepService creates a new instance
-func NewViaCepService() ViaCepService {
-	return &viaCepImpl{}
+func New() *ViaCepService {
+	return &ViaCepService{}
 }
 
 // Request - fetch data from viacep api
-func (vc *viaCepImpl) Request(cep string) (*structs.Cep, error) {
-	result := structs.ViaCepResponse{}
+func (vc *ViaCepService) Request(cep string) (*entity.Cep, error) {
+	result := viaCepResponse{}
 
 	res, err := http.Get("https://viacep.com.br/ws/" + cep + "/json/")
 	if err != nil {
@@ -40,18 +35,18 @@ func (vc *viaCepImpl) Request(cep string) (*structs.Cep, error) {
 	return vc.formater(&result)
 }
 
-func (vc *viaCepImpl) formater(r *structs.ViaCepResponse) (*structs.Cep, error) {
+func (vc *ViaCepService) formater(r *viaCepResponse) (*entity.Cep, error) {
 	if r == nil {
-		return nil, errors.New("Cep not found")
+		return nil, errors.CepNotFoundError
 	}
 
-	cep := &structs.Cep{
+	cep := &entity.Cep{
 		Cep:          r.Cep,
 		City:         r.City,
 		Neighborhood: r.Neighborhood,
 		State:        r.State,
 		Street:       r.Street,
-		Provider:     "Viacep",
+		Provider:     "ViaCEP",
 	}
 
 	return cep, nil

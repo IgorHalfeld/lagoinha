@@ -36,9 +36,25 @@ import (
 )
 
 func main() {
-	address, _ := lagoinha.GetAddress("CEP_GOES_HERE")
-	fmt.Printf("Complete Address %v:", address)
+	// get amount of cep providers enabled
+	fmt.Println("Total amount of cep providers:", lagoinha.GetTotalAmountOfCepProviders())
+	chResp, chErr := lagoinha.GetAddress("04568000")
+
+	select {
+	case address := <-chResp:
+		fmt.Printf("Response: %+v\n", address)
+	case err := <-chErr:
+		fmt.Printf("Error: %+v\n", err)
+	}
 }
+```
+
+você também pode setar uma api de preferência
+
+```golang
+chResp, chErr := lagoinha.GetAddress("04568000", &lagoinha.GetAddressOptions{
+	PreferenceForAPI: "ViaCEP",
+})
 ```
 
 logo by [@nelsonsecco](https://twitter.com/nelsonsecco)

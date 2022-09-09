@@ -1,4 +1,4 @@
-package services
+package correios
 
 import (
 	"bytes"
@@ -6,27 +6,21 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/igorhalfeld/lagoinha/structs"
+	"github.com/igorhalfeld/lagoinha/internal/entity"
 )
 
-// CorreiosService service
-type CorreiosService interface {
-	Request(cep string) (*structs.Cep, error)
-}
+type CorreiosService struct{}
 
-type correiosImpl struct{}
-
-// NewCorreiosService creates a new instance
-func NewCorreiosService() CorreiosService {
-	return &correiosImpl{}
+func New() *CorreiosService {
+	return &CorreiosService{}
 }
 
 // Request - fetch data from correios api
-func (cs *correiosImpl) Request(cep string) (*structs.Cep, error) {
+func (cs *CorreiosService) Request(cep string) (*entity.Cep, error) {
 	const proxyURL = "https://proxier.now.sh/"
 	client := &http.Client{}
 
-	result := structs.CorreiosResponse{}
+	result := correiosResponse{}
 
 	url := proxyURL + "https://apps.correios.com.br/SigepMasterJPA/AtendeClienteService/AtendeCliente?wsdl"
 	payload := `
@@ -62,12 +56,12 @@ func (cs *correiosImpl) Request(cep string) (*structs.Cep, error) {
 	return cs.formater(&result)
 }
 
-func (cs *correiosImpl) formater(r *structs.CorreiosResponse) (*structs.Cep, error) {
+func (cs *CorreiosService) formater(r *correiosResponse) (*entity.Cep, error) {
 	if r == nil {
 		return nil, errors.New("Cep not found")
 	}
 
-	cep := &structs.Cep{
+	cep := &entity.Cep{
 		Cep:          r.Body.Consult.Return.Cep,
 		City:         r.Body.Consult.Return.City,
 		Neighborhood: r.Body.Consult.Return.Neighborhood,
