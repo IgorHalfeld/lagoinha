@@ -3,6 +3,7 @@ package lagoinha
 import (
 	"github.com/igorhalfeld/lagoinha/internal/entity"
 	"github.com/igorhalfeld/lagoinha/internal/service"
+	"github.com/igorhalfeld/lagoinha/internal/service/apicep"
 	"github.com/igorhalfeld/lagoinha/internal/service/brasilapi"
 	"github.com/igorhalfeld/lagoinha/internal/service/viacep"
 	"github.com/igorhalfeld/lagoinha/pkg/errors"
@@ -11,14 +12,13 @@ import (
 var providers = map[string]service.Provider{
 	"BrasilAPI": brasilapi.New(),
 	"ViaCEP":    viacep.New(),
+	"Apicep":    apicep.New(),
 }
 
+// GetTotalAmountOfCepProviders returns amount of current enabled cep provivers
 func GetTotalAmountOfCepProviders() int {
 	return len(providers)
 }
-
-// TotalAmountOfCepProviders returns amount of current enabled cep provivers
-const TotalAmountOfCepProviders = 2
 
 func getAddress(cepRaw string, opts *GetAddressOptions, chResponse chan *entity.Cep, chError chan error) {
 	cep := entity.Cep{
@@ -70,7 +70,7 @@ type GetAddressOptions struct {
 
 // GetAddress - get address
 func GetAddress(cepRaw string, opts *GetAddressOptions) (chan *entity.Cep, chan error) {
-	chResponse := make(chan *entity.Cep, TotalAmountOfCepProviders)
+	chResponse := make(chan *entity.Cep, GetTotalAmountOfCepProviders())
 	chError := make(chan error)
 
 	go getAddress(cepRaw, opts, chResponse, chError)
