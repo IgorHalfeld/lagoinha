@@ -36,6 +36,7 @@ func getAddress(cepRaw string, opts *GetAddressOptions, chResponse chan *entity.
 			provider, ok := providers[opts.PreferenceForAPI]
 			if !ok {
 				chError <- errors.PreferenceProviderNotFound
+				return
 			}
 
 			c, err := provider.Request(cep.Cep)
