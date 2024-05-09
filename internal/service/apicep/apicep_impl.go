@@ -3,6 +3,7 @@ package apicep
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/igorhalfeld/lagoinha/internal/entity"
 	"github.com/igorhalfeld/lagoinha/pkg/errors"
@@ -18,18 +19,29 @@ func New() *ApicepService {
 func (wn *ApicepService) Request(cep string) (*entity.Cep, error) {
 	result := apicepResponse{}
 
-	res, err := http.Get("https://ws.apicep.com/cep/" + cep + ".json")
+	client := &http.Client{
+		Timeout: time.Second * 2,
+	}
+
+	res, err := client.Get("https://ws.apicep.com/cep/" + cep + ".json")
 	if err != nil {
 		return nil, err
 	}
 
 	defer res.Body.Close()
 
+	if res.StatusCode != 200 {
+		return nil, errors.HttpError(res.StatusCode)
+	}
+
 	err = json.NewDecoder(res.Body).Decode(&result)
 	if err != nil {
 		return nil, err
 	}
 
+	if result.Status != 200 {
+		return nil, errors.HttpError(result.Status)
+	}
 	return wn.formater(&result)
 }
 

@@ -5,6 +5,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/igorhalfeld/lagoinha/internal/entity"
 )
@@ -18,7 +19,9 @@ func New() *CorreiosService {
 // Request - fetch data from correios api
 func (cs *CorreiosService) Request(cep string) (*entity.Cep, error) {
 	const proxyURL = "https://proxier.now.sh/"
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: time.Second * 2,
+	}
 
 	result := correiosResponse{}
 

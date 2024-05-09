@@ -1,11 +1,15 @@
 package lagoinha
 
 import (
+	"context"
+	"time"
+
 	"github.com/igorhalfeld/lagoinha/internal/entity"
 	"github.com/igorhalfeld/lagoinha/internal/service"
 	"github.com/igorhalfeld/lagoinha/internal/service/apicep"
 	"github.com/igorhalfeld/lagoinha/internal/service/brasilapi"
 	"github.com/igorhalfeld/lagoinha/internal/service/viacep"
+	"github.com/igorhalfeld/lagoinha/internal/service/widenet"
 	"github.com/igorhalfeld/lagoinha/pkg/errors"
 )
 
@@ -13,6 +17,7 @@ var providers = map[string]service.Provider{
 	"BrasilAPI": brasilapi.New(),
 	"ViaCEP":    viacep.New(),
 	"Apicep":    apicep.New(),
+	"WidNet":    widenet.New(),
 }
 
 // GetTotalAmountOfCepProviders returns amount of current enabled cep provivers
@@ -33,20 +38,36 @@ func getAddress(cepRaw string, opts *GetAddressOptions, chResponse chan *entity.
 	// TODO: enhance this way of handling options
 	if opts != nil {
 		if opts.PreferenceForAPI != "" {
+			chResponseInternal := make(chan *entity.Cep, GetTotalAmountOfCepProviders())
+			chErrorInternal := make(chan error)
+
 			provider, ok := providers[opts.PreferenceForAPI]
 			if !ok {
 				chError <- errors.PreferenceProviderNotFound
 				return
 			}
 
-			c, err := provider.Request(cep.Cep)
-			if err != nil {
-				chError <- err
-				return
-			}
+			ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+			defer cancel()
 
-			chResponse <- c
-			return
+			go func() {
+				c, err := provider.Request(cep.Cep)
+				if err != nil {
+					chErrorInternal <- err
+					return
+				}
+
+				chResponseInternal <- c
+			}()
+
+			select {
+			case address := <-chResponseInternal:
+				chResponse <- address
+			case err := <-chErrorInternal:
+				chError <- err
+			case <-ctx.Done():
+				cancel()
+			}
 		}
 	}
 
@@ -76,4 +97,25 @@ func GetAddress(cepRaw string, opts *GetAddressOptions) (chan *entity.Cep, chan 
 	go getAddress(cepRaw, opts, chResponse, chError)
 
 	return chResponse, chError
+}
+
+func GetAddressWithoutChannel(cepRaw string, opts *GetAddressOptions) (*entity.Cep, error) {
+	totalAmountOfCepProvider := GetTotalAmountOfCepProviders()
+	chResponse := make(chan *entity.Cep, totalAmountOfCepProvider)
+	chError := make(chan error)
+
+	go getAddress(cepRaw, opts, chResponse, chError)
+
+	var err error
+	i := 0
+	for i < totalAmountOfCepProvider {
+		select {
+		case address := <-chResponse:
+			return address, nil
+		case err = <-chError:
+			i++
+		}
+	}
+
+	return nil, err
 }
