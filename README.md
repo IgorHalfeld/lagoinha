@@ -8,7 +8,8 @@
   </p>
 </p>
 
---- 
+---
+
 <a href='https://github.com/jpoles1/gopherbadger' target='_blank'>![gopherbadger-tag-do-not-edit](https://img.shields.io/badge/Go%20Coverage-16%25-brightgreen.svg?longCache=true&style=flat)</a>
 
 Lagoinha é basicamente um pacote que usa a API dos Correios, ViaCep e outros para pegar o endereço com base em um CEP. O que o pacote faz, é disparar pra todas as APIs ao mesmo tempo e retornar com o resultado da primeira API que responder.
@@ -38,6 +39,13 @@ import (
 func main() {
 	// get amount of cep providers enabled
 	fmt.Println("Total amount of cep providers:", lagoinha.GetTotalAmountOfCepProviders())
+
+  // if you want to use without handling channels
+	address, err := lagoinha.GetAddressSync("15809240", &lagoinha.GetAddressOptions{
+		PreferenceForAPI: "Apicep",
+	})
+
+
 	chResp, chErr := lagoinha.GetAddress("04568000")
 
 	select {
