@@ -5,7 +5,7 @@
   </h3>
   <p align="center">
   	Library to get full address of a Brazilian zip code. <br />
-	Works with VipCep, Correios and much more.
+	  Works with VipCep, Correios, and many more.
   </p>
 </p>
 
@@ -13,7 +13,7 @@
 
 <a href='https://github.com/jpoles1/gopherbadger' target='_blank'>![gopherbadger-tag-do-not-edit](https://img.shields.io/badge/Go%20Coverage-16%25-brightgreen.svg?longCache=true&style=flat)</a>
 
-Lagoinha is a package that uses APIs to find complete addresses by a provided zip code. The packet dispatches several requests at the same time and returns with the one that finished first.
+Lagoinha is a package that uses APIs to find complete addresses by a provided zip code. The lib dispatches several requests at the same time and returns with the one that finished first.
 
 ### Por que esse nome
 
