@@ -4,7 +4,8 @@
     Lagoinha
   </h3>
   <p align="center">
-    Utilitário Golang para busca por CEP integrado diretamente <br /> aos serviços dos Correios, ViaCEP e outros
+  	Library to get full address of a Brazilian zip code. <br />
+	Works with VipCep, Correios and much more.
   </p>
 </p>
 
@@ -12,20 +13,20 @@
 
 <a href='https://github.com/jpoles1/gopherbadger' target='_blank'>![gopherbadger-tag-do-not-edit](https://img.shields.io/badge/Go%20Coverage-16%25-brightgreen.svg?longCache=true&style=flat)</a>
 
-Lagoinha é basicamente um pacote que usa a API dos Correios, ViaCep e outros para pegar o endereço com base em um CEP. O que o pacote faz, é disparar pra todas as APIs ao mesmo tempo e retornar com o resultado da primeira API que responder.
+Lagoinha is a package that uses APIs to find complete addresses by a provided zip code. The packet dispatches several requests at the same time and returns with the one that finished first.
 
 ### Por que esse nome
 
-É simples, veja o [vídeo](https://www.youtube.com/watch?v=C1Sd_RWF5ks)!
+It's a Brazilian meme [vídeo](https://www.youtube.com/watch?v=C1Sd_RWF5ks)!
 (onde é que eu tô, lagoinha, CEP, endereço...)
 
-### Instalação
+### Install
 
 ```sh
 go get -u https://github.com/IgorHalfeld/lagoinha.git
 ```
 
-### Como usar
+### How to use
 
 ```golang
 package main
@@ -40,11 +41,12 @@ func main() {
 	// get amount of cep providers enabled
 	fmt.Println("Total amount of cep providers:", lagoinha.GetTotalAmountOfCepProviders())
 
-  // if you want to use without handling channels
-	address, err := lagoinha.GetAddressSync("15809240", &lagoinha.GetAddressOptions{
+	/*
+	// if you want to use without handling channels
+	addr, err := lagoinha.GetAddressSync("15809240", &lagoinha.GetAddressOptions{
 		PreferenceForAPI: "Apicep",
 	})
-
+	*/
 
 	chResp, chErr := lagoinha.GetAddress("04568000")
 
@@ -57,7 +59,7 @@ func main() {
 }
 ```
 
-você também pode setar uma api de preferência
+and you can also set a preference api
 
 ```golang
 chResp, chErr := lagoinha.GetAddress("04568000", &lagoinha.GetAddressOptions{
