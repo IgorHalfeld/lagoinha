@@ -31,7 +31,14 @@ func (wn *WidenetService) Request(cep string) (*entity.Cep, error) {
 	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
-		return nil, errors.HttpError(res.StatusCode)
+		switch res.StatusCode {
+		case http.StatusTooManyRequests:
+			return nil, errors.TooManyRequestsError
+		case http.StatusInternalServerError:
+			return nil, errors.InternalServerError
+		default:
+			return nil, errors.CepNotFoundError
+		}
 	}
 
 	err = json.NewDecoder(res.Body).Decode(&result)

@@ -2,8 +2,6 @@ package lagoinha
 
 import (
 	"context"
-	"fmt"
-	"sync"
 	"time"
 
 	"github.com/igorhalfeld/lagoinha/internal/entity"
@@ -28,7 +26,7 @@ func GetTotalAmountOfCepProviders() int {
 }
 
 func getAddress(cepRaw string, opts *GetAddressOptions, chResponse chan *entity.Cep, chError chan error) {
-	var wg sync.WaitGroup
+	// var wg sync.WaitGroup
 
 	cep := entity.Cep{
 		Cep: cepRaw,
@@ -54,9 +52,9 @@ func getAddress(cepRaw string, opts *GetAddressOptions, chResponse chan *entity.
 			ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 			defer cancel()
 
-			wg.Add(1)
+			// wg.Add(1)
 			go func() {
-				defer wg.Done()
+				// defer wg.Done()
 				c, err := provider.Request(cep.Cep)
 				if err != nil {
 					chErrorInternal <- err
@@ -79,9 +77,9 @@ func getAddress(cepRaw string, opts *GetAddressOptions, chResponse chan *entity.
 
 	// TODO: add context.WithCancel for slower requests
 	for providerName := range providers {
-		wg.Add(1)
+		// wg.Add(1)
 		go func(p, cv string) {
-			defer wg.Done()
+			// defer wg.Done()
 			c, err := providers[p].Request(cv)
 			if err != nil {
 				chError <- err
@@ -92,9 +90,9 @@ func getAddress(cepRaw string, opts *GetAddressOptions, chResponse chan *entity.
 		}(providerName, cep.Cep)
 	}
 
-	wg.Wait()
-	close(chResponse)
-	close(chError)
+	// wg.Wait()
+	// close(chResponse)
+	// close(chError)
 }
 
 type GetAddressOptions struct {
@@ -118,19 +116,40 @@ func GetAddressSync(cepRaw string, opts *GetAddressOptions) (*entity.Cep, error)
 
 	go getAddress(cepRaw, opts, chResponse, chError)
 
-	var lastError error
-	for i := 0; i <= totalAmountOfCepProvider; i++ {
+	var err error
+	i := 0
+	for i < totalAmountOfCepProvider {
 		select {
 		case address := <-chResponse:
 			return address, nil
-		case err := <-chError:
-			lastError = err
+		case err = <-chError:
+			i++
 		}
 	}
 
-	if lastError != nil {
-		return nil, lastError
-	}
-
-	return nil, fmt.Errorf("address not found for cep %s", cepRaw)
+	return nil, err
 }
+
+// func GetAddressSync(cepRaw string, opts *GetAddressOptions) (*entity.Cep, error) {
+// 	totalAmountOfCepProvider := GetTotalAmountOfCepProviders()
+// 	chResponse := make(chan *entity.Cep, totalAmountOfCepProvider)
+// 	chError := make(chan error)
+
+// 	go getAddress(cepRaw, opts, chResponse, chError)
+
+// 	var lastError error
+// 	for i := 0; i < totalAmountOfCepProvider; i++ {
+// 		select {
+// 		case address := <-chResponse:
+// 			return address, nil
+// 		case err := <-chError:
+// 			lastError = err
+// 		}
+// 	}
+
+// 	if lastError != nil {
+// 		return nil, lastError
+// 	}
+
+// 	return nil, fmt.Errorf("address not found for cep %s", cepRaw)
+// }
