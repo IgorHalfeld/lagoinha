@@ -3,10 +3,12 @@ package correios
 import (
 	"bytes"
 	"encoding/xml"
-	"errors"
+
 	"net/http"
+	"time"
 
 	"github.com/igorhalfeld/lagoinha/internal/entity"
+	"github.com/igorhalfeld/lagoinha/pkg/errors"
 )
 
 type CorreiosService struct{}
@@ -18,7 +20,9 @@ func New() *CorreiosService {
 // Request - fetch data from correios api
 func (cs *CorreiosService) Request(cep string) (*entity.Cep, error) {
 	const proxyURL = "https://proxier.now.sh/"
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: time.Second * 2,
+	}
 
 	result := correiosResponse{}
 
@@ -48,6 +52,17 @@ func (cs *CorreiosService) Request(cep string) (*entity.Cep, error) {
 
 	defer res.Body.Close()
 
+	if res.StatusCode != 200 {
+		switch res.StatusCode {
+		case http.StatusTooManyRequests:
+			return nil, errors.TooManyRequestsError
+		case http.StatusInternalServerError:
+			return nil, errors.InternalServerError
+		default:
+			return nil, errors.CepNotFoundError
+		}
+	}
+
 	err = xml.NewDecoder(res.Body).Decode(&result)
 	if err != nil {
 		return nil, err
@@ -58,7 +73,7 @@ func (cs *CorreiosService) Request(cep string) (*entity.Cep, error) {
 
 func (cs *CorreiosService) formater(r *correiosResponse) (*entity.Cep, error) {
 	if r == nil {
-		return nil, errors.New("Cep not found")
+		return nil, errors.CepNotFoundError
 	}
 
 	cep := &entity.Cep{

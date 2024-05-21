@@ -2,10 +2,11 @@ package widenet
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
+	"time"
 
 	"github.com/igorhalfeld/lagoinha/internal/entity"
+	"github.com/igorhalfeld/lagoinha/pkg/errors"
 )
 
 type WidenetService struct{}
@@ -18,12 +19,27 @@ func New() *WidenetService {
 func (wn *WidenetService) Request(cep string) (*entity.Cep, error) {
 	result := widenetResponse{}
 
-	res, err := http.Get("http://apps.widenet.com.br/busca-cep/api/cep/" + cep + ".json")
+	client := &http.Client{
+		Timeout: time.Second * 2,
+	}
+
+	res, err := client.Get("http://apps.widenet.com.br/busca-cep/api/cep/" + cep + ".json")
 	if err != nil {
 		return nil, err
 	}
 
 	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		switch res.StatusCode {
+		case http.StatusTooManyRequests:
+			return nil, errors.TooManyRequestsError
+		case http.StatusInternalServerError:
+			return nil, errors.InternalServerError
+		default:
+			return nil, errors.CepNotFoundError
+		}
+	}
 
 	err = json.NewDecoder(res.Body).Decode(&result)
 	if err != nil {
@@ -35,7 +51,7 @@ func (wn *WidenetService) Request(cep string) (*entity.Cep, error) {
 
 func (wn *WidenetService) formater(r *widenetResponse) (*entity.Cep, error) {
 	if r == nil {
-		return nil, errors.New("Cep not found")
+		return nil, errors.CepNotFoundError
 	}
 
 	cep := &entity.Cep{

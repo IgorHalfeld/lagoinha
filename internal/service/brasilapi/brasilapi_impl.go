@@ -3,6 +3,7 @@ package brasilapi
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/igorhalfeld/lagoinha/internal/entity"
 	"github.com/igorhalfeld/lagoinha/pkg/errors"
@@ -18,12 +19,27 @@ func New() *BrasilAPIService {
 func (ba *BrasilAPIService) Request(cep string) (*entity.Cep, error) {
 	result := brasilAPIResponse{}
 
-	res, err := http.Get("https://brasilapi.com.br/api/cep/v1/" + cep)
+	client := &http.Client{
+		Timeout: time.Second * 2,
+	}
+
+	res, err := client.Get("https://brasilapi.com.br/api/cep/v1/" + cep)
 	if err != nil {
 		return nil, err
 	}
 
 	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		switch res.StatusCode {
+		case http.StatusTooManyRequests:
+			return nil, errors.TooManyRequestsError
+		case http.StatusInternalServerError:
+			return nil, errors.InternalServerError
+		default:
+			return nil, errors.CepNotFoundError
+		}
+	}
 
 	err = json.NewDecoder(res.Body).Decode(&result)
 	if err != nil {
